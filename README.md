@@ -174,7 +174,7 @@ This project was created and is maintained by:
 **Karunendra Dwivedy** \
 **Pankhuri Agrawal**\
 **Nishi Srivastava**\
-**Aeshna Varshney**\
+**Aeshna Varshney**
 
 
 ## 🙏 Acknowledgements
