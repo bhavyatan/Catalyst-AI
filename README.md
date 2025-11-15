@@ -170,9 +170,12 @@ Future enhancements include:
 
 This project was created and is maintained by:
 
-**Devansh Sharma** \
+**Bhavya Tandon** \
 **Karunendra Dwivedy** \
-**Pankhuri Agrawal**
+**Pankhuri Agrawal**\
+**Nishi Srivastava**\
+**Aeshna Varshney**\
+
 
 ## 🙏 Acknowledgements
 
@@ -184,5 +187,3 @@ This project was created and is maintained by:
 
 ---
 
-*An AF's Endeavor Developed with 🥤 and 💡*
-=======
