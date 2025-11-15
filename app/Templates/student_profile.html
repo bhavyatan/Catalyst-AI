@@ -1,0 +1,561 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Student Dashboard - (Catalyst AI)
+{% endblock %}
+
+{% block content %}
+<style>
+  /* --- Modern Color Scheme --- */
+  :root {
+    /* Using the gradient from base.html for consistency */
+    --primary-color-start: #6366f1;
+    --primary-color-end: #a78bfa;
+    --primary-gradient: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end));
+
+    --text-primary: #1a202c;
+    --text-secondary: #4a5568;
+    --card-bg: #ffffff;
+    --card-shadow: 0 8px 25px rgba(99, 102, 241, 0.1);
+    --card-border: 1px solid #e2e8f0;
+  }
+
+  /* --- Dashboard View Cards --- */
+  .dashboard-card {
+    position: relative;
+    padding: 30px;
+    margin-bottom: 25px;
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.15);
+  }
+
+  .section-title {
+    color: var(--text-primary);
+    margin-bottom: 25px;
+    font-size: 1.5em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  /* Style icons with the primary gradient */
+  .section-title i {
+    font-size: 1.2em;
+    margin-right: 12px;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .info-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .info-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.05rem;
+    margin-bottom: 1.5rem; /* Add spacing between items */
+  }
+
+  /* --- Edit Button --- */
+  .edit-button {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    background: #eef2ff; /* Light indigo */
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color-start);
+    z-index: 10;
+  }
+
+  .edit-button:hover {
+    background: var(--primary-color-start);
+    color: white;
+    transform: rotate(15deg) scale(1.1);
+  }
+
+  /* --- Fullscreen Form Container --- */
+  .form-container {
+    position: fixed;
+    top: 70px; /* Below navbar */
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 70px); /* Full height minus navbar */
+    background: #f8f9fa; /* Light BG for form */
+    z-index: 1000;
+    overflow-y: auto;
+    display: none;
+    opacity: 0;
+    transform: scale(0.98);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .form-container.active {
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Custom Scrollbar */
+  .form-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  .form-container::-webkit-scrollbar-track {
+    background: #eef2ff;
+  }
+  .form-container::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color-start);
+    border-radius: 8px;
+  }
+
+  /* Close Form Button */
+  .close-form {
+    position: fixed;
+    top: 85px; /* Adjust position relative to viewport */
+    right: 30px;
+    background: var(--primary-color-start);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+  }
+
+  .close-form:hover {
+    background: var(--primary-color-end);
+    transform: rotate(90deg);
+  }
+
+  /* Form Content Wrapper */
+  .form-wrapper {
+    max-width: 1000px; /* Wider for 2-col layout */
+    margin: 30px auto 100px auto; /* Add bottom margin */
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 0.85rem 1rem;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-color-start);
+    box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+    background-color: white;
+  }
+
+  /* --- Buttons --- */
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    border: none;
+  }
+
+  .btn-primary-gradient {
+    background-image: var(--primary-gradient);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-primary-gradient:hover {
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 7px 15px rgba(99, 102, 241, 0.4);
+  }
+
+  .btn-light {
+    background-color: #f1f5f9;
+    color: var(--text-secondary);
+  }
+  .btn-light:hover {
+    background-color: #e2e8f0;
+  }
+
+
+  /* --- Success Message (FIXED) --- */
+  .success-message {
+    position: fixed;
+    top: 90px;
+    right: 30px;
+    background-color: #34D399; /* Modern green */
+    color: white;
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex; /* Use flex for alignment */
+    align-items: center;
+    z-index: 2000;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    
+    /* Hidden by default */
+    opacity: 0;
+    transform: translate(30px, -30px);
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .success-message.show {
+    opacity: 1;
+    transform: translate(0, 0);
+    visibility: visible;
+  }
+
+  .success-message i {
+    margin-right: 12px;
+    font-size: 20px;
+  }
+
+</style>
+
+<div class="dashboard-view" id="dashboardView">
+
+  <div class="dashboard-card">
+    <button class="edit-button" onclick="toggleEdit()" title="Edit Profile">
+      <i class="fas fa-pencil-alt"></i>
+    </button>
+    <h5 class="section-title"><i class="fas fa-user-circle"></i> Personal Information</h5>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="info-label"><i class="fas fa-user"></i> Name</div>
+        <div class="info-value">{{ user.name if user.name else 'Not provided' }}</div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-label"><i class="fas fa-envelope"></i> Email</div>
+        <div class="info-value">{{ user.email if user.email else 'Not provided' }}</div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-label"><i class="fas fa-phone"></i> Phone</div>
+        <div class="info-value">{{ user.phone if user.phone else 'Not provided' }}</div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-label"><i class="fas fa-venus-mars"></i> Gender</div>
+        <div class="info-value">{{ user.gender if user.gender else 'Not provided' }}</div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-label"><i class="fas fa-calendar-alt"></i> Date of Birth</div>
+        <div class="info-value">{{ user.dob if user.dob else 'Not provided' }}</div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-label"><i class="fas fa-calendar-check"></i> Year of Admission</div>
+        <div class="info-value">{{ user.startdate if user.startdate else 'Not provided' }}</div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-label"><i class="fas fa-calendar-times"></i> Expected Year of Graduation</div>
+        <div class="info-value">{{ user.enddate if user.enddate else 'Not provided' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-card">
+    <h5 class="section-title"><i class="fas fa-briefcase"></i> Career Information</h5>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="info-label"><i class="fas fa-bullseye"></i> Career Goal</div>
+        <div class="info-value">{{ user.career_goal if user.career_goal else 'Not provided' }}</div>
+      </div>
+      <div class="col-md-6">
+        <div class="info-label"><i class="fas fa-building"></i> Dream Company</div>
+        <div class="info-value">{{ user.dream_company if user.dream_company else 'Not provided' }}</div>
+      </div>
+      <div class="col-md-6">
+        <div class="info-label"><i class="fas fa-rocket"></i> Interested in Entrepreneurship?</div>
+        <div class="info-value">{{ user.entrepreneurship_interest if user.entrepreneurship_interest else 'Not provided'
+          }}</div>
+      </div>
+      <div class="col-md-6">
+        <div class="info-label"><i class="fas fa-industry"></i> Interested Industries</div>
+        <div class="info-value">{{ user.interested_industries if user.interested_industries else 'Not provided' }}</div>
+      </div>
+      <div class="col-md-6">
+        <div class="info-label"><i class="fas fa-exchange-alt"></i> Company Preference</div>
+        <div class="info-value">{{ user.company_preference if user.company_preference else 'Not provided' }}</div>
+      </div>
+      <div class="col-md-12">
+        <div class="info-label"><i class="fas fa-quote-left"></i> Personal Statement</div>
+        <div class="info-value">{{ user.personal_statement if user.personal_statement else 'Not provided' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-card">
+    <h5 class="section-title"><i class="fas fa-link"></i> Social Links</h5>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="info-label"><i class="fab fa-github"></i> GitHub</div>
+        <div class="info-value">{{ user.githubProfile if user.githubProfile else 'Not provided' }}</div>
+      </div>
+      <div class="col-md-6">
+        <div class="info-label"><i class="fab fa-linkedin"></i> LinkedIn</div>
+        <div class="info-value">{{ user.linkedinProfile if user.linkedinProfile else 'Not provided' }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="form-container" id="formContainer">
+  <button class="close-form" onclick="toggleEdit()" title="Close">
+    <i class="fas fa-times"></i>
+  </button>
+  <div class="form-wrapper">
+    <form id="profileForm" action="/student_profile" method="post">
+
+      <h5 class="section-title"><i class="fas fa-user-circle"></i> User Account Details</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="exampleInputUsername1">Name</label>
+            <input type="text" class="form-control" id="exampleInputUsername1" name="name"
+              value="{{ user.name if user.name else '' }}" placeholder="Your Name">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="exampleInputEmail1">Email address</label>
+            <input type="email" class="form-control" id="exampleInputEmail1" name="email"
+              value="{{ user.email if user.email else '' }}" placeholder="Email" readonly>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="exampleInputPhone">Phone Number</label>
+            <input type="tel" class="form-control" id="exampleInputPhone" name="phone"
+              value="{{ user.phone if user.phone else '' }}" placeholder="Phone Number">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select class="form-select" id="gender" name="gender">
+              <option value="" {% if not user.gender %}selected{% endif %} disabled>Select gender</option>
+              <option value="male" {% if user.gender=='Male' %}selected{% endif %}>Male</option>
+              <option value="female" {% if user.gender=='Female' %}selected{% endif %}>Female</option>
+              <option value="other" {% if user.gender=='Other' %}selected{% endif %}>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="exampleInputDOB">Date of Birth</label>
+            <input type="date" class="form-control" id="exampleInputDOB" name="dob"
+              value="{{ user.dob if user.dob else '' }}">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="exampleInputJoiningDate">Start Date</label>
+            <input type="date" class="form-control" id="exampleInputJoiningDate" name="startdate"
+              value="{{ user.startdate if user.startdate else '' }}">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="exampleInputEndDate">End Date</label>
+            <input type="date" class="form-control" id="exampleInputEndDate" name="enddate"
+              value="{{ user.enddate if user.enddate else '' }}">
+          </div>
+        </div>
+      </div>
+
+      <h5 class="section-title mt-4"><i class="fas fa-briefcase"></i> Career Aspirations</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="careerAimGoal">What career do you aspire to pursue?</label>
+            <input type="text" class="form-control" id="careerAimGoal" name="career_goal"
+              placeholder="e.g., Data Scientist, AI Engineer"
+              value="{{ user.career_goal if user.career_goal else '' }}">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="dreamCompany">Dream Company</label>
+            <input type="text" class="form-control" id="dreamCompany" name="dream_company"
+              placeholder="e.g., Google, Tesla" value="{{ user.dream_company if user.dream_company else '' }}">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="entrepreneurshipInterest">Interested in entrepreneurship?</label>
+            <select class="form-select" id="entrepreneurshipInterest" name="entrepreneurship_interest">
+              <option value="" {% if not user.entrepreneurship_interest %}selected{% endif %} disabled>Select one</option>
+              <option value="Yes" {% if user.entrepreneurship_interest=='Yes' %}selected{% endif %}>Yes</option>
+              <option value="No" {% if user.entrepreneurship_interest=='No' %}selected{% endif %}>No</option>
+              <option value="Maybe" {% if user.entrepreneurship_interest=='Maybe' %}selected{% endif %}>Maybe</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="companyPreference">Company Preference</label>
+            <select class="form-select" id="companyPreference" name="company_preference">
+              <option value="" {% if not user.company_preference %}selected{% endif %} disabled>Select preference</option>
+              <option value="service" {% if user.company_preference=='service' %}selected{% endif %}>Service-Based
+              </option>
+              <option value="product" {% if user.company_preference=='product' %}selected{% endif %}>Product-Based
+              </option>
+              <option value="both" {% if user.company_preference=='both' %}selected{% endif %}>Both/No Preference</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="interestedIndustries">What industries are you most curious about?</label>
+            <input type="text" class="form-control" id="interestedIndustries" name="interested_industries"
+              placeholder="e.g., Technology, Healthcare, FinTech"
+              value="{{ user.interested_industries if user.interested_industries else '' }}">
+          </div>
+        </div>
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="personalStatement">How can I assist you in achieving your dreams?</label>
+            <textarea class="form-control" id="personalStatement" name="personal_statement" rows="3"
+              placeholder="Your vision, motivation, or areas you need help with...">{{ user.personal_statement if user.personal_statement else '' }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <h5 class="section-title mt-4"><i class="fas fa-link"></i> Social Links</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="githubProfile">GitHub Profile URL</label>
+            <input type="url" class="form-control" id="githubProfile" name="githubProfile"
+              value="{{ user.githubProfile if user.githubProfile else '' }}" placeholder="https://github.com/username">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="linkedinProfile">LinkedIn Profile URL</label>
+            <input type="url" class="form-control" id="linkedinProfile" name="linkedinProfile"
+              value="{{ user.linkedinProfile if user.linkedinProfile else '' }}"
+              placeholder="https://linkedin.com/in/username">
+          </div>
+        </div>
+      </div>
+
+
+      <div class="form-buttons text-end mt-4">
+        <button type="button" class="btn btn-light me-2" onclick="toggleEdit()">Cancel</button>
+        <button type="submit" class="btn btn-primary-gradient">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="successMessage" class="success-message">
+  <i class="fas fa-check-circle"></i>
+  Profile updated successfully!
+</div>
+
+
+
+<script>
+  function toggleEdit() {
+    const dashboardView = document.getElementById('dashboardView');
+    const formContainer = document.getElementById('formContainer');
+
+    if (formContainer.classList.contains('active')) {
+      // Hide form
+      formContainer.classList.remove('active');
+      dashboardView.style.display = 'block';
+    } else {
+      // Show form
+      formContainer.classList.add('active');
+      dashboardView.style.display = 'none';
+    }
+  }
+
+  // CONSOLIDATED SCRIPT
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('profileForm');
+    const successMessage = document.getElementById('successMessage');
+
+    // Single, correct form submission handler
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault(); // Stop default form submission
+
+      try {
+        const formData = new FormData(form);
+        const response = await fetch('/student_profile', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          // 1. Show success message
+          successMessage.classList.add('show');
+          
+          // 2. Hide the edit form
+          toggleEdit();
+
+          // 3. Hide message and reload page after 2.5 seconds
+          setTimeout(() => {
+            successMessage.classList.remove('show');
+            window.location.reload(); // Reload to show new data
+          }, 2500); 
+
+        } else {
+          // Handle server error
+          alert('Error updating profile. The server responded with an error.');
+        }
+      } catch (error) {
+        // Handle network error
+        console.error('Error:', error);
+        alert('A network error occurred. Please try again.');
+      }
+    });
+
+    // Close form on escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && document.getElementById('formContainer').classList.contains('active')) {
+        toggleEdit();
+      }
+    });
+  });
+</script>
+{% endblock %}

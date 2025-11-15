@@ -1,0 +1,456 @@
+{% extends 'base.html' %}
+
+{% block title %}Learning Plan - {{ phase.name }}{% endblock %}
+
+{% block content %}
+
+<!-- AOS CSS -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+<style>
+  :root {
+    --primary: #4B49AC;
+    --secondary: #98BDFF;
+    --accent: #7DA0FA;
+    --success: #48BB78;
+    --warning: #F6AD55;
+    --text: #2D3748;
+    --text-light: #718096;
+    --bg: #F7FAFC;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --border: rgba(255, 255, 255, 0.2);
+    --shadow: 0 8px 32px rgba(75, 73, 172, 0.12);
+    --radius: 16px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body {
+    background: linear-gradient(135deg, #f0f4f8 0%, #e6ebfa 100%);
+    min-height: 100vh;
+  }
+
+  .container { max-width: 1200px; }
+
+  .phase-header {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    padding: 2rem;
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .phase-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,30 L100,100 L0,100 Z" fill="rgba(255,255,255,0.1)"/></svg>') no-repeat;
+    background-size: cover;
+  }
+
+  .phase-title {
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .phase-desc {
+    opacity: 0.95;
+    margin-top: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .back-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: auto;
+    z-index: 10;
+  }
+
+  .back-btn:hover {
+    background: white;
+    color: var(--primary);
+    transform: translateY(-2px);
+  }
+
+  .week-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 1.8rem;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition);
+  }
+
+  .week-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 40px rgba(75, 73, 172, 0.18);
+  }
+
+  .week-header {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    padding: 1.2rem 1.5rem;
+    user-select: none;
+  }
+
+  .week-header:hover { opacity: 0.95; }
+
+  .week-title {
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .ai-tutor-btn {
+    background: rgba(255, 255, 255, 0.25);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+    animation: pulse 2s infinite;
+    text-decoration: none;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+  }
+
+  .ai-tutor-btn:hover {
+    background: white;
+    color: var(--primary);
+    transform: scale(1.05);
+  }
+
+  .week-body { padding: 1.8rem; }
+
+  .section-title {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin: 1.5rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .objectives-list {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    border-left: 4px solid var(--secondary);
+  }
+
+  .objectives-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #e2e8f0;
+  }
+
+  .objectives-list li:last-child { border-bottom: none; }
+
+  .progress-container {
+    background: #e9ecef;
+    border-radius: 50px;
+    height: 12px;
+    overflow: hidden;
+    margin: 1rem 0;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--secondary), var(--accent));
+    border-radius: 50px;
+    transition: width 0.6s ease;
+    position: relative;
+  }
+
+  .progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.3) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.3) 75%, transparent 75%, transparent);
+    background-size: 20px 20px;
+    animation: progress-shine 2s linear infinite;
+  }
+
+  @keyframes progress-shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .task-table { font-size: 0.95rem; }
+  .task-table th {
+    background: #f1f5f9;
+    font-weight: 600;
+    color: var(--text);
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .task-table td {
+    vertical-align: top;
+    padding: 1rem 0.75rem;
+  }
+
+  .task-list { margin: 0; padding-left: 1.2rem; }
+  .task-list li { margin-bottom: 0.4rem; }
+  .task-list li::marker { color: var(--secondary); }
+
+  .form-switch .form-check-input {
+    width: 3rem; height: 1.5rem;
+    background-color: #cbd5e0; border-color: #cbd5e0;
+  }
+
+  .form-switch .form-check-input:checked {
+    background-color: var(--success); border-color: var(--success);
+  }
+
+  .form-switch .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(75, 73, 172, 0.25);
+  }
+
+  .assessment-card {
+    background: linear-gradient(135deg, #EBF4FF, #E0E7FF);
+    border-left: 5px solid var(--accent);
+    border-radius: 12px;
+    padding: 1.2rem;
+    font-style: italic;
+    color: var(--text);
+  }
+
+  .skills-badge {
+    background: rgba(75, 73, 172, 0.15);
+    color: var(--primary);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    border: 1px solid rgba(75, 73, 172, 0.2);
+  }
+
+  .week-toggle {
+    cursor: pointer;
+    font-size: 1.3rem;
+    transition: transform 0.3s ease;
+  }
+
+  .week-toggle.collapsed { transform: rotate(-90deg); }
+
+  @media (max-width: 768px) {
+    .phase-header { padding: 1.5rem; }
+    .phase-title { font-size: 1.5rem; }
+    .week-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .ai-tutor-btn { width: 100%; justify-content: center; }
+    .task-table { font-size: 0.85rem; }
+  }
+</style>
+
+<div class="container my-5" data-aos="fade-up">
+  <!-- Phase Header -->
+  <div class="phase-header d-flex justify-content-between align-items-center flex-wrap gap-3" data-aos="fade-down">
+    <div>
+      <h1 class="phase-title">Learning Plan: {{ phase.name }}</h1>
+      <p class="phase-desc mb-0">{{ phase.description }}</p>
+    </div>
+    <a href="{{ url_for('roadmap_bp.roadmap') }}" class="back-btn" style="pointer-events: auto; z-index: 10;">
+      <i class="fas fa-arrow-left"></i> Back to Roadmap
+    </a>
+  </div>
+
+  <!-- Skills -->
+  <div class="d-flex flex-wrap gap-2 mb-4" data-aos="fade-up" data-aos-delay="100">
+    {% for skill in phase.skills %}
+      <span class="skills-badge">{{ skill }}</span>
+    {% endfor %}
+  </div>
+
+  <!-- Weekly Plans -->
+  <div class="learning-plan">
+    {% for week in phase.learning_plan.weekly_schedule %}
+      {% set weekIndex = loop.index0 %}
+      <div class="week-card" data-aos="fade-up" data-aos-delay="{{ loop.index0 * 100 }}">
+        <div class="week-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3 flex-grow-1" 
+               data-bs-toggle="collapse" 
+               data-bs-target="#week{{ week.week }}" 
+               style="cursor: pointer;">
+            <i class="fas fa-chevron-down week-toggle"></i>
+            <h3 class="week-title mb-0">Week {{ week.week }}</h3>
+          </div>
+          <a href="{{ url_for('tutor_bp.tutor_page', phase_id=phase_id, module_id=week.week) }}" 
+             class="ai-tutor-btn" 
+             rel="noopener"
+             onclick="event.stopPropagation();">
+            <i class="fas fa-robot"></i> AI Tutor for Week {{ week.week }}
+          </a>
+        </div>
+
+        <div class="collapse show week-body" id="week{{ week.week }}">
+          <!-- Learning Objectives -->
+          <div class="mb-4">
+            <h4 class="section-title"><i class="fas fa-bullseye"></i> Learning Objectives</h4>
+            <ul class="objectives-list list-unstyled">
+              {% for objective in week.learning_objectives %}
+                <li><i class="fas fa-check text-success me-2"></i> {{ objective }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <!-- Daily Tasks -->
+          <div>
+            <h4 class="section-title"><i class="fas fa-tasks"></i> Daily Tasks</h4>
+
+            <!-- Progress -->
+            {% set total_tasks = week.daily_tasks|length %}
+            {% set ns = namespace(completed=0) %}
+            {% for task in week.daily_tasks %}
+              {% if task.completed %}
+                {% set ns.completed = ns.completed + 1 %}
+              {% endif %}
+            {% endfor %}
+            {% set progress = (ns.completed / total_tasks * 100)|round(0) if total_tasks > 0 else 0 %}
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fw-semibold">{{ ns.completed }}/{{ total_tasks }} completed</span>
+              <span class="badge bg-{{ 'success' if progress == 100 else 'primary' }} fs-6">{{ progress }}%</span>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar" style="width: {{ progress }}%"></div>
+            </div>
+
+            <!-- Tasks Table -->
+            <div class="table-responsive mt-4">
+              <table class="table table-hover task-table align-middle">
+                <thead>
+                  <tr>
+                    <th>Day</th>
+                    <th>Tasks</th>
+                    <th>Resources</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for task in week.daily_tasks %}
+                    {% set dayIndex = loop.index0 %}
+                    <tr>
+                      <td><strong>Day {{ task.day }}</strong></td>
+                      <td>
+                        <ul class="task-list">
+                          {% for task_item in task.tasks %}
+                            <li>{{ task_item }}</li>
+                          {% endfor %}
+                        </ul>
+                      </td>
+                      <td>
+                        <ul class="task-list">
+                          {% for resource in task.resources %}
+                            <li>{{ resource }}</li>
+                          {% endfor %}
+                        </ul>
+                      </td>
+                      <td><span class="badge bg-light text-dark">{{ task.duration_hours }}h</span></td>
+                      <td>
+                        <div class="form-check form-switch">
+                          <input class="form-check-input task-checkbox" type="checkbox" role="switch"
+                                 id="task_{{ weekIndex }}_{{ dayIndex }}" data-week="{{ weekIndex }}" data-day="{{ dayIndex }}"
+                                 {% if task.completed %}checked{% endif %}>
+                          <label class="form-check-label fw-medium" for="task_{{ weekIndex }}_{{ dayIndex }}">
+                            {{ 'Done' if task.completed else 'Pending' }}
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Weekly Assessment -->
+          <div class="mt-5">
+            <h4 class="section-title"><i class="fas fa-clipboard-check"></i> Weekly Assessment</h4>
+            <div class="assessment-card">
+              <p class="mb-0">{{ week.assessment }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- AOS JS -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init({ duration: 800, once: true });
+
+  // Toggle icon
+  document.querySelectorAll('.week-header [data-bs-toggle="collapse"]').forEach(el => {
+    el.addEventListener('click', function() {
+      const icon = this.querySelector('.week-toggle');
+      icon.classList.toggle('collapsed');
+    });
+  });
+
+  // Task completion
+  document.querySelectorAll('.task-checkbox').forEach(cb => {
+    cb.addEventListener('change', function() {
+      const week = this.dataset.week;
+      const day = this.dataset.day;
+      const completed = this.checked;
+      const label = this.nextElementSibling;
+
+      fetch('/complete-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phase_id: '{{ phase_id }}',
+          week_index: week,
+          day_index: day,
+          completed: completed
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'success') {
+          label.textContent = completed ? 'Done' : 'Pending';
+          setTimeout(() => location.reload(), 300);
+        } else {
+          this.checked = !completed;
+          label.textContent = !completed ? 'Done' : 'Pending';
+          alert('Failed to update. Try again.');
+        }
+      })
+      .catch(() => {
+        this.checked = !completed;
+        label.textContent = !completed ? 'Done' : 'Pending';
+        alert('Network error.');
+      });
+    });
+  });
+</script>
+
+{% endblock %}

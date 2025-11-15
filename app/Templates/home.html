@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - (Catalyst AI){% endblock %}
+
+{% block content %}
+<!-- ==== HERO ==== -->
+<section class="hero py-5 text-center position-relative overflow-hidden">
+    <div class="container position-relative z-2">
+        <h1 class="display-3 fw-bold mb-3 animate__animated animate__fadeInDown">
+            Welcome to <span class="text-gradient">Catalyst AI</span>
+        </h1>
+        <p class="lead fs-4 animate__animated animate__fadeInUp animate__delay-1s">
+            AI-Driven Career Readiness Platform.
+        </p>
+
+        {% if message %}
+        <div class="alert alert-danger mt-4 w-50 mx-auto animate__animated animate__shakeX" role="alert">
+            {{ message }}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- ==== MAIN CAROUSEL ==== -->
+<div class="container my-5">
+    <div id="mainCarousel" class="carousel slide shadow-lg rounded-4 overflow-hidden" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            {% set images = [
+            'image-1.jpeg','image-2.jpeg','image-3.jpeg','image-4.jpeg','image-5.jpeg'
+            ] %}
+            {% for img in images %}
+            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                <img src="{{ url_for('static', filename='images/' ~ img) }}" class="d-block w-100"
+                    alt="Slide {{ loop.index }}">
+                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded-3 p-3">
+                    <h5 class="fw-bold">{{ loop.index }} / {{ images|length }}</h5>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</div>
+
+<!-- ==== GRADIENT DIVIDER ==== -->
+<hr class="gradient-divider">
+
+<!-- ==== TOP COMPANIES TIMELINE ==== -->
+<section class="container py-5" id="companies">
+    <h2 class="text-center mb-5 display-5 fw-bold text-gradient">Top 5 Companies This Year</h2>
+    <div class="main-timeline">
+        {% for company in companies %}
+        <article class="timeline-item {% if loop.index is odd %}left{% else %}right{% endif %} glass-card"
+            data-aos="fade-{{ 'right' if loop.index is odd else 'left' }}">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-bold mb-2">{{ company.name }}</h5>
+                    <p class="text-muted small mb-2">
+                        <i class="fas fa-calendar-alt me-1"></i>{{ company.visit_date }}
+                    </p>
+                    <p class="mb-0">Role offered: <strong class="text-primary">{{ company.role_offered }}</strong></p>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+<hr class="gradient-divider">
+
+<!-- ==== ARTICLES CAROUSEL ==== -->
+<section class="container py-5" id="articles">
+    <h2 class="text-center mb-5 display-5 fw-bold text-gradient">New Articles</h2>
+    <div id="articleCarousel" class="carousel slide shadow-lg rounded-4 overflow-hidden" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            {% for i in range(0, stories|length, 3) %}
+            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                <div class="row g-4 p-4">
+                    {% for story in stories[i:i+3] %}
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm hover-scale animate__animated" data-aos="zoom-in"
+                            data-aos-delay="{{ loop.index0 * 100 }}">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title fw-semibold">{{ story.title }}</h5>
+                                <p class="text-muted small">
+                                    By <strong>{{ story.author.name }}</strong> – {{ story.wordCount }} words
+                                </p>
+                                <p class="text-muted small">Reading Time: {{ story.readingTime|round(1) }} mins</p>
+                                <div class="mt-auto">
+                                    <span class="badge bg-primary me-1"><i class="fa-solid fa-hands-clapping"></i> {{
+                                        story.clapCount }}</span>
+                                    <span class="badge bg-success"><i class="fa-solid fa-comment"></i> {{
+                                        story.responses }}</span>
+                                </div>
+                                <a href="{{ story.url }}" target="_blank"
+                                    class="btn btn-outline-primary btn-sm mt-3 w-100">
+                                    Read More <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#articleCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#articleCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</section>
+
+<hr class="gradient-divider">
+
+<!-- ==== WHY LEO SECTION ==== -->
+<section class="container py-5" id="leo">
+    <h2 class="text-center mb-5 display-5 fw-bold text-gradient">Why Choose Career Coach Leo?</h2>
+    <div class="row g-4">
+        {% set reasons = [
+        "Expert advice tailored to your career aspirations.",
+        "Insights into the latest industry trends and skills.",
+        "Interactive support to help you make informed decisions."
+        ] %}
+        {% for reason in reasons %}
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 hover-scale" data-aos="fade-up"
+                data-aos-delay="{{ loop.index0 * 150 }}">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-check-circle text-success mb-3" style="font-size:2rem;"></i>
+                    <p class="fs-5">{{ reason }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- ==== TESTIMONIALS ==== -->
+    <h3 class="text-center mt-5 mb-4 display-6 fw-bold text-gradient">Real Guidance Examples</h3>
+    <div class="row g-4">
+        {% set testimonials = [
+        {
+        "question": "What are my skills?",
+        "answer": "You've got a great skillset, Saketh! Your profile lists Data Analysis, Streamlit, Deep Learning,
+        Machine Learning, SQL, MongoDB, Python, CSS, and HTML5. Quite a range!"
+        },
+        {
+        "question": "Which role can I pursue according to my profile?",
+        "answer": "Based on your skills and experience, Saketh, you could pursue roles like Data Scientist, Machine
+        Learning Engineer, Data Analyst, or Web Developer. Which one sounds most interesting to you?"
+        }
+        ] %}
+        {% for t in testimonials %}
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100 glass-card hover-scale" data-aos="flip-left"
+                data-aos-delay="{{ loop.index0 * 200 }}">
+                <div class="card-body p-4">
+                    <p class="fw-bold text-primary mb-2">User asks:</p>
+                    <p class="fst-italic mb-3">{{ t.question }}</p>
+                    <p class="fw-bold text-success mb-2">Career Coach Leo responds:</p>
+                    <p class="fst-italic">{{ t.answer }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ==== STYLES & SCRIPTS ==== -->
+<style>
+    :root {
+        --primary: #0aedc7;
+        --gradient: linear-gradient(135deg, #0aedc7, #0aedd3);
+        --text-grad: linear-gradient(90deg, #0aedc7, #00b894);
+    }
+
+    .text-gradient {
+        background: var(--text-grad);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .gradient-divider {
+        height: 5px;
+        background: var(--gradient);
+        border: none;
+        border-radius: 5px;
+        margin: 4rem auto;
+        width: 80%;
+    }
+
+    .hero {
+        background: transparent;
+        padding: 3rem 0;
+        text-align: center;
+    }
+
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, .4);
+        z-index: 1;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, .15);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, .2);
+    }
+
+    .hover-scale {
+        transition: transform .3s ease, box-shadow .3s ease;
+    }
+
+    .hover-scale:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, .15) !important;
+    }
+
+    /* Timeline */
+    .main-timeline {
+        position: relative;
+        padding: 2rem 0;
+    }
+
+    .main-timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 3px;
+        background: var(--primary);
+        transform: translateX(-50%);
+    }
+
+    .timeline-item {
+        opacity: 0;
+        width: 45%;
+        margin-bottom: 3rem;
+    }
+
+    .timeline-item.left {
+        align-self: flex-end;
+        text-align: right;
+        margin-right: 5%;
+    }
+
+    .timeline-item.right {
+        align-self: flex-start;
+        text-align: left;
+        margin-left: 5%;
+    }
+
+    .timeline-item .card {
+        transition: all .4s ease;
+    }
+</style>
+<!-- AOS (Animate On Scroll) -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<script>
+    // Init AOS
+    AOS.init({ duration: 800, once: true });
+
+    // Optional: GSAP + ScrollTrigger for extra smoothness (uncomment if you want)
+    // gsap.registerPlugin(ScrollTrigger);
+    // document.querySelectorAll('.timeline-item').forEach((el,i) => {
+    //   gsap.from(el, {x: i%2===0 ? -100 : 100, opacity:0, duration:0.8, scrollTrigger:{trigger:el, start:"top 80%"}});
+    // });
+</script>
+{% endblock %}

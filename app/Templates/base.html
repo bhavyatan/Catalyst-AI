@@ -1,0 +1,383 @@
+{%- macro render_sidebar_nav(request) -%}
+<ul class="nav flex-column">
+
+  <li class="nav-item">
+    <a class="nav-link d-flex align-items-center px-4 py-3 {% if request.path == '/' %}active{% endif %}" href="/">
+      <i class="bi bi-house-door me-3 fs-5"></i> <span>Home</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link d-flex align-items-center px-4 py-3 {% if 'resources' in request.path or 'news-articles' in request.path %}active{% endif %}"
+      data-bs-toggle="collapse" href="#learningMenu">
+      <i class="bi bi-book me-3 fs-5"></i> <span>Learning</span> <i class="ms-auto bi bi-chevron-down"></i>
+    </a>
+    <div
+      class="collapse nav-collapse {% if 'resources' in request.path or 'news-articles' in request.path %}show{% endif %}"
+      id="learningMenu">
+      <ul class="nav flex-column ps-5">
+        <li class="nav-item"><a class="nav-link py-2 {% if 'resources' in request.path %}active{% endif %}"
+            href="/resources">Resources</a></li>
+        <li class="nav-item"><a class="nav-link py-2 {% if 'news-articles' in request.path %}active{% endif %}"
+            href="/news-articles">Tech News</a></li>
+      </ul>
+    </div>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link d-flex align-items-center px-4 py-3 {% if 'student_profile' in request.path %}active{% endif %}"
+      data-bs-toggle="collapse" href="#communityMenu">
+      <i class="bi bi-people me-3 fs-5"></i> <span>Community</span> <i class="ms-auto bi bi-chevron-down"></i>
+    </a>
+    <div class="collapse nav-collapse {% if 'student_profile' in request.path %}show{% endif %}" id="communityMenu">
+      <ul class="nav flex-column ps-5">
+        <li class="nav-item"><a class="nav-link py-2 {% if 'student_profile' in request.path %}active{% endif %}"
+            href="/student_profile">Student Profile</a></li>
+      </ul>
+    </div>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link d-flex align-items-center px-4 py-3 {% if 'road-map' in request.path %}active{% endif %}"
+      href="/road-map">
+      <i class="fa-solid fa-map me-3 fs-5"></i> <span>Roadmap</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link d-flex align-items-center px-4 py-3 {% if 'your-career_coach-leo011' in request.path %}active{% endif %}"
+      href="/your-career_coach-leo011">
+      <i class="bi bi-robot me-3 fs-5"></i> <span>Career Coach (Leo Bot)</span>
+    </a>
+  </li>
+
+</ul>
+{%- endmacro -%}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendors/feather/feather.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendors/ti-icons/css/themify-icons.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendors/css/vendor.bundle.base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/vertical-layout-light/style.css') }}">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom-ui.css') }}">
+
+  <link rel="icon" href="{{ url_for('static', filename='Images/Catalyst AI-Bulb.png') }}" type="image/x-icon">
+  <title>{% block title %}Catalyst AI{% endblock %}</title>
+
+  <style>
+    :root {
+      --sidebar-width: 250px;
+      --sidebar-width-collapsed: 80px;
+      --primary-color-start: #6366f1;
+      --primary-color-end: #a78bfa;
+      --primary-gradient: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end));
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .container-scroller {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .page-body-wrapper {
+      flex-grow: 1;
+      padding-top: 70px;
+    }
+
+    .main-panel {
+      transition: margin-left 0.3s ease-in-out;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .content-wrapper {
+      flex-grow: 1;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      transition: width 0.3s ease-in-out;
+      height: calc(100vh - 70px);
+      position: fixed;
+      top: 70px;
+      left: 0;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+
+    .sidebar .nav-link {
+      color: #4a5568;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      border-radius: 8px; /* Add border-radius for hover/active */
+      margin: 0 0.5rem; /* Match active margin */
+      transition: all 0.2s ease;
+    }
+
+    .sidebar .nav-link:hover {
+      background-color: #f8f9fa;
+      color: var(--primary-color-start);
+    }
+
+    /* Active Link Styling */
+    .sidebar .nav-link.active {
+      background: var(--primary-gradient);
+      color: white;
+      box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    }
+
+    .sidebar .nav-link.active i {
+      color: white !important;
+    }
+
+    .sidebar .nav-link i.me-3 {
+      transition: margin 0.3s ease-in-out;
+    }
+
+    /* --- FIX 3: STYLED THE SUBMENU --- */
+    .nav-collapse {
+      padding-left: 0.5rem; /* Align with parent padding */
+    }
+
+    .nav-collapse .nav-link {
+      font-size: 0.9rem;
+      color: #718096; /* The grey text */
+      padding-top: 0.6rem; 
+      padding-bottom: 0.6rem;
+      margin-top: 0.25rem;
+    }
+    
+    /* This is the new rule that fixes the grey text */
+    .nav-collapse .nav-link.active,
+    .nav-collapse .nav-link:hover {
+      color: var(--primary-color-start);
+      background-color: #eef2ff; /* Light indigo */
+      font-weight: 500;
+    }
+    
+    .sidebar .nav-link.active + .nav-collapse .nav-link {
+        /* When parent is active, make children text slightly lighter */
+        color: #4a5568; 
+    }
+    
+    .sidebar .nav-link.active + .nav-collapse .nav-link.active,
+    .sidebar .nav-link.active + .nav-collapse .nav-link:hover {
+        /* When parent is active, highlight child */
+        color: var(--primary-color-start);
+        background-color: white; 
+        font-weight: 600;
+    }
+    
+
+    /* --- FOLDABLE SIDEBAR STYLES --- */
+    body.sidebar-collapsed .sidebar {
+      width: var(--sidebar-width-collapsed);
+    }
+
+    body.sidebar-collapsed .sidebar .nav-link span,
+    body.sidebar-collapsed .sidebar .nav-link .bi-chevron-down {
+      display: none;
+    }
+
+    body.sidebar-collapsed .sidebar .nav-link {
+      justify-content: center;
+    }
+
+    body.sidebar-collapsed .sidebar .nav-link .me-3 {
+      margin-right: 0 !important;
+    }
+
+    body.sidebar-collapsed .sidebar .collapse.show {
+      display: none;
+    }
+
+    /* Adjust main content margin */
+    @media (min-width: 992px) {
+      .main-panel {
+        margin-left: var(--sidebar-width);
+      }
+
+      body.sidebar-collapsed .main-panel {
+        margin-left: var(--sidebar-width-collapsed);
+      }
+    }
+
+    .content-wrapper {
+      padding: 2.5rem 2.5rem;
+    }
+
+    .footer {
+      flex-shrink: 0;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="container-scroller">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top py-3">
+      <div class="container-fluid px-4">
+
+        <button class="navbar-toggler d-none d-lg-block border-0 me-2" type="button" id="sidebarToggleBtn">
+          <i class="bi bi-list fs-4"></i>
+        </button>
+
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <img src="{{ url_for('static', filename='Images/Catalyst AI.png') }}" height="40" class="me-2"
+            alt="Catalyst AI">
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas"
+          data-bs-target="#sidebarOffcanvas">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="d-flex align-items-center ms-auto">
+
+          <div class="nav-item dropdown me-3">
+            <a class="nav-link position-relative p-2 text-dark" href="#" id="notificationDropdown"
+              data-bs-toggle="dropdown">
+              <i class="bi bi-bell fs-5"></i>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                id="notification-count">0</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end shadow-sm p-0" style="width:320px;" id="notification-list">
+              <div class="dropdown-header bg-primary text-white px-3 py-2">Notifications</div>
+            </div>
+          </div>
+
+          <div class="nav-item dropdown">
+            <a class="nav-link p-0" href="#" id="profileDropdown" data-bs-toggle="dropdown">
+              <img src="{{ url_for('static', filename='Images/Profile-Image.jpg') }}" class="rounded-circle" width="40"
+                height="40" alt="Profile">
+            </a>
+            <div class="dropdown-menu dropdown-menu-end shadow-sm">
+              <a class="dropdown-item" href="/student_profile">
+                <i class="bi bi-person me-2 text-primary"></i> Profile
+              </a>
+              <a class="dropdown-item" href="/logout">
+                <i class="bi bi-box-arrow-right me-2 text-primary"></i> Logout
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+
+    <div class="offcanvas offcanvas-start bg-white" tabindex="-1" id="sidebarOffcanvas">
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title">Menu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body p-0">
+        {{ render_sidebar_nav(request) }}
+      </div>
+    </div>
+
+    <div class="page-body-wrapper d-flex">
+      <nav class="sidebar bg-white shadow-sm d-none d-lg-block" id="sidebar">
+        {{ render_sidebar_nav(request) }}
+      </nav>
+
+      <div class="main-panel flex-grow-1">
+        <div class="content-wrapper">
+          {% block content %}{% endblock %}
+        </div>
+
+        <footer class="footer border-top bg-white mt-auto py-4">
+          <div class="container-fluid text-center text-md-start">
+            <div class="row align-items-center">
+              <div class="col-md-6">
+                <span class="text-muted">
+                  Copyright © 2025 <a href="/" class="text-primary">Catalyst AI (V1.0)</a>. All rights reserved.
+                </span>
+              </div>
+              <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                <span class="text-muted">
+                  An AF’s Endeavor with <span class="fs-4">Cold Drink</span> & <span class="fs-4">Light Bulb</span>.
+                </span>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='vendors/js/vendor.bundle.base.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/off-canvas.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/hoverable-collapse.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/template.js') }}"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+
+  <script>
+    // ---- Sidebar Toggle (NEW) ----
+    document.addEventListener("DOMContentLoaded", function () {
+      const toggleButton = document.getElementById('sidebarToggleBtn');
+      if (toggleButton) {
+        toggleButton.addEventListener('click', function () {
+          document.body.classList.toggle('sidebar-collapsed');
+        });
+      }
+    });
+
+
+    // ---- Notification fetch (unchanged) ----
+    function fetchNotifications() {
+      fetch('/get_notifications')
+        .then(r => r.json())
+        .then(notifs => {
+          const list = document.getElementById('notification-list');
+          const count = document.getElementById('notification-count');
+          count.textContent = notifs.length;
+          list.innerHTML = `<div class="dropdown-header bg-primary text-white px-3 py-2">Notifications</div>`;
+          notifs.forEach(n => {
+            const item = `
+            <a class="dropdown-item d-flex align-items-start p-3 border-bottom">
+              <div class="me-3">
+                <div class="icon-circle bg-${n.completed ? 'success' : 'warning'} text-white">
+                  <i class="ti-calendar"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="mb-1">${n.message}</h6>
+                <p class="mb-0 text-muted small">${new Date(n.created_at).toLocaleString()}</p>
+              </div>
+            </a>`;
+            list.insertAdjacentHTML('beforeend', item);
+          });
+        });
+    }
+    setInterval(fetchNotifications, 60000);
+    fetchNotifications();
+  </script>
+</body>
+
+</html>

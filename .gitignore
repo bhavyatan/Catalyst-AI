@@ -1,0 +1,42 @@
+# Environment variables and sensitive files
+.env
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+.installed.cfg
+*$py.class
+
+# Build and distribution files
+build/
+dist/
+develop-eggs/
+eggs/
+.eggs/
+sdist/
+
+# Virtual environments
+.venv/
+venv/
+catalyst-ai/
+
+# IDE files and configuration
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Web framework-specific directories (Flask/Django)
+instance/
+.webassets-cache
+
+# Database files
+*.db
+*.sqlite
